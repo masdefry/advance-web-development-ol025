@@ -1,0 +1,120 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Get a free hosted Postgres database in seconds: `npx create-db`
+
+generator client {
+  provider = "prisma-client"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+enum Role {
+  ADMIN
+  CASHIER
+}
+
+model User {
+  id        String   @id @default(uuid())
+  name      String
+  email     String   @unique
+  password  String
+  role      Role     @default(CASHIER)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  deletedAt DateTime?
+
+  transactions Transaction[]
+
+  @@map("users")
+}
+
+model Category {
+  id        String   @id @default(uuid())
+  name      String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  deletedAt DateTime?
+
+  products  Product[]
+
+  @@map("categories")
+}
+
+model Product {
+  id          String   @id @default(uuid())
+  name        String
+  price       Float
+  isAvailable Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  deletedAt   DateTime?
+
+  categoryId  String
+  category    Category @relation(fields: [categoryId], references: [id])
+
+  transactionItems TransactionItem[]
+  productImages    ProductImage[]
+
+  @@map("products")
+}
+
+model ProductImage{
+  id            String          @id @default(uuid())
+  url           String 
+  isPrimary     Boolean         @default(false)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  deletedAt   DateTime?
+
+  productId     String 
+  products    Product           @relation(fields: [productId], references: [id])
+
+  @@map("product_images")
+}
+
+model Transaction {
+  id          String   @id @default(uuid())
+  customerName  String  
+  totalPrice  Float
+  totalItem   Float 
+  payment     Float?
+  change      Float?
+  paymentMethod PaymentMethod
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  deletedAt   DateTime?
+
+  cashierId      String
+  user        User @relation(fields: [cashierId], references: [id])
+
+  items       TransactionItem[]
+
+  @@map("transactions")
+}
+
+enum PaymentMethod{
+  CASH 
+  QRIS
+  DEBIT_CARD
+  CREDIT_CARD
+}
+
+model TransactionItem {
+  id            String   @id @default(uuid())
+  qty           Int
+  price         Float
+
+  transactionId String
+  transaction   Transaction @relation(fields: [transactionId], references: [id])
+
+  productId     String
+  product       Product @relation(fields: [productId], references: [id])
+
+  @@map("transaction_items")
+}
