@@ -1,9 +1,13 @@
 import express, { NextFunction, Request, Response } from 'express';
+import cors from 'cors';
 import { authRouter } from './features/auth/auth.router';
+import { corsOptions } from './configs/cors-options.config';
 
 const PORT: number = 8000;
 const app = express();
 const API_PREFIX = '/api/v1';
+
+app.use(cors(corsOptions));
 
 app.use(express.json());
 
