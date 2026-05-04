@@ -1,5 +1,6 @@
 'use client';
 
+import { loginApi } from '@/features/login/api/loginApi';
 import { loginSchema } from '@/features/login/schemas/loginSchema';
 import { axiosInstance } from '@/utils/axiosInstance';
 import { useFormik } from 'formik';
@@ -16,11 +17,7 @@ export default function LoginPage() {
     validationSchema: loginSchema,
     onSubmit: async ({ email, password }) => {
       try {
-        const res = await axiosInstance.post('/auth/login', {
-          email,
-          password,
-        });
-        console.log(res);
+        await loginApi({email, password})
       } catch (error) {
         console.log(error);
       }
