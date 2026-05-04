@@ -31,11 +31,17 @@ export const authController = {
       password,
     });
 
+    res.cookie('accessToken', accessToken, {
+      httpOnly: true,
+      secure: true, 
+      sameSite: 'strict', 
+      path: '/',
+    });
+    
     res.status(200).json({
       success: true,
       message: 'User authentication successful',
       data: {
-        accessToken,
         name,
         role,
       },
