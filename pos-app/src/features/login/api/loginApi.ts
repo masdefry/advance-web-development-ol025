@@ -6,5 +6,5 @@ export async function loginApi(payload: LoginRequest) {
     password: payload.password,
   });
 
-  return res.data;
+  return res;
 }

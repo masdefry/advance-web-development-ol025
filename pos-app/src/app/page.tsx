@@ -1,14 +1,12 @@
 'use client';
 
-import { loginApi } from '@/features/login/api/loginApi';
+import useLogin from '@/features/login/hooks/useLogin';
 import { loginSchema } from '@/features/login/schemas/loginSchema';
 import { useFormik } from 'formik';
-import { useState } from 'react';
 import { HiOutlineEye, HiOutlineEyeOff } from 'react-icons/hi';
 
 export default function LoginPage() {
-  const [showPassword, setShowPassword] = useState(false);
-  const [loading, setLoading] = useState(false);
+  const { showPassword, setShowPassword, loading, execute } = useLogin();
 
   const formik = useFormik({
     initialValues: {
@@ -17,14 +15,7 @@ export default function LoginPage() {
     },
     validationSchema: loginSchema,
     onSubmit: async ({ email, password }) => {
-      try {
-        setLoading(true);
-        await loginApi({ email, password });
-      } catch (error) {
-        console.log(error);
-      } finally {
-        setLoading(false);
-      }
+      await execute({ email, password });
     },
   });
 
