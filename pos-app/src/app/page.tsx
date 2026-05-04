@@ -2,13 +2,14 @@
 
 import { loginApi } from '@/features/login/api/loginApi';
 import { loginSchema } from '@/features/login/schemas/loginSchema';
-import { axiosInstance } from '@/utils/axiosInstance';
 import { useFormik } from 'formik';
 import { useState } from 'react';
 import { HiOutlineEye, HiOutlineEyeOff } from 'react-icons/hi';
 
 export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false);
+  const [loading, setLoading] = useState(false);
+
   const formik = useFormik({
     initialValues: {
       email: '',
@@ -17,9 +18,12 @@ export default function LoginPage() {
     validationSchema: loginSchema,
     onSubmit: async ({ email, password }) => {
       try {
-        await loginApi({email, password})
+        setLoading(true);
+        await loginApi({ email, password });
       } catch (error) {
         console.log(error);
+      } finally {
+        setLoading(false);
       }
     },
   });
@@ -111,9 +115,17 @@ export default function LoginPage() {
           {/* Button */}
           <button
             type='submit'
+            disabled={loading}
             className='mb-6 flex w-full items-center justify-center gap-2 rounded-xl bg-blue-600 py-2.5 text-sm font-semibold text-white hover:bg-blue-700 transition'
           >
-            Login →
+            {loading ? (
+              <>
+                <span className='loading loading-spinner loading-xs'></span>{' '}
+                Please Wait...
+              </>
+            ) : (
+              'Login →'
+            )}
           </button>
         </form>
 
