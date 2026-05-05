@@ -1,43 +1,36 @@
 import { Request, Response } from 'express';
 import { authService } from './auth.service';
+import { validate } from '../../validations/validation';
+import { authValidation } from '../../validations/auth.validation';
 
 export const authController = {
   async register(req: Request, res: Response) {
-    const { name, password, email, role } = req.body;
+    const data = validate(authValidation.registerUser, req.body);
 
-    await authService.register({
-      name,
-      password,
-      email,
-      role,
-    });
+    const {name, email} = await authService.register(data);
 
     res.status(201).json({
       success: true,
       message: 'Register user account successful',
       data: {
         name,
-        email,
-        role,
+        email
       },
     });
   },
 
   async login(req: Request, res: Response) {
-    const { email, password } = req.body;
+    const data = validate(authValidation.loginUser, req.body);
 
-    const { accessToken, name, role } = await authService.login({
-      email,
-      password,
-    });
+    const { accessToken, name, role } = await authService.login(data);
 
     res.cookie('accessToken', accessToken, {
       httpOnly: true,
-      secure: true, 
-      sameSite: 'strict', 
+      secure: true,
+      sameSite: 'strict',
       path: '/',
     });
-    
+
     res.status(200).json({
       success: true,
       message: 'User authentication successful',
