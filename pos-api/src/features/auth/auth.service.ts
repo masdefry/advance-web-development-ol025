@@ -1,8 +1,12 @@
-import { User } from '../../../generated/prisma/client';
+import path from 'node:path';
 import { prisma } from '../../database/database';
 import { bcrypt } from '../../lib/bcrypt.lib';
 import { jwt } from '../../lib/jwt.lib';
+import transporter from '../../lib/nodemailer.lib';
 import { LoginUserRequest, RegisterUserRequest } from './auth.model';
+import fs from 'fs';
+import Handlebars from 'handlebars';
+import { JWT_SECRET_ACCOUNT_ACTIVATION } from '../../configs/dotenv.config';
 
 export const authService = {
   async register(data: RegisterUserRequest) {
@@ -16,7 +20,7 @@ export const authService = {
 
     const hashedPassword = await bcrypt.hashPassword(data.password);
 
-    await prisma.user.create({
+    const createdUser = await prisma.user.create({
       data: {
         name: data.name,
         password: hashedPassword,
@@ -24,10 +28,39 @@ export const authService = {
       },
     });
 
+    const accountActivationToken = await jwt.signToken(
+      {
+        userId: createdUser?.id,
+      },
+      JWT_SECRET_ACCOUNT_ACTIVATION!,
+      {
+        expiresIn: '10m',
+      },
+    );
+
+    const templateDir = path.resolve(__dirname, './../../templates');
+
+    const templatePath = path.join(templateDir, 'email-verification.html');
+
+    const templateSource = fs.readFileSync(templatePath, 'utf-8');
+
+    const templateCompiled = Handlebars.compile(templateSource);
+
+    const templateHtml = templateCompiled({
+      name: data.name,
+      accountActivationUrl: `http://localhost:3000/account-activation/token/${accountActivationToken}`,
+    });
+
+    await transporter.sendMail({
+      subject: 'Email Verification',
+      to: data.email,
+      html: templateHtml,
+    });
+
     return {
-      name: data.name, 
-      email: data.email
-    }
+      name: data.name,
+      email: data.email,
+    };
   },
 
   async login(data: LoginUserRequest) {
@@ -58,9 +91,9 @@ export const authService = {
     );
 
     return {
-      accessToken, 
-      name: findExistingUser?.name, 
-      role: findExistingUser?.role
-    }
+      accessToken,
+      name: findExistingUser?.name,
+      role: findExistingUser?.role,
+    };
   },
 };
