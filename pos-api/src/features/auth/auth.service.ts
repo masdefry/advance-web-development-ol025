@@ -7,6 +7,7 @@ import { LoginUserRequest, RegisterUserRequest } from './auth.model';
 import fs from 'fs';
 import Handlebars from 'handlebars';
 import { JWT_SECRET_ACCOUNT_ACTIVATION } from '../../configs/dotenv.config';
+import { Request } from 'express';
 
 export const authService = {
   async register(data: RegisterUserRequest) {
@@ -48,7 +49,7 @@ export const authService = {
 
     const templateHtml = templateCompiled({
       name: data.name,
-      accountActivationUrl: `http://localhost:3000/account-activation/token/${accountActivationToken}`,
+      accountActivationUrl: `http://localhost:3000/account-activation/${accountActivationToken}`,
     });
 
     await transporter.sendMail({
@@ -95,5 +96,16 @@ export const authService = {
       name: findExistingUser?.name,
       role: findExistingUser?.role,
     };
+  },
+
+  async accountVerification(userId: string) {
+    await prisma.user.update({
+      where: {
+        id: userId,
+      },
+      data: {
+        isVerified: true,
+      },
+    });
   },
 };
