@@ -6,8 +6,7 @@ import transporter from '../../lib/nodemailer.lib';
 import { LoginUserRequest, RegisterUserRequest } from './auth.model';
 import fs from 'fs';
 import Handlebars from 'handlebars';
-import { JWT_SECRET_ACCOUNT_ACTIVATION } from '../../configs/dotenv.config';
-import { Request } from 'express';
+import { JWT_SECRET_ACCOUNT_ACTIVATION, JWT_SECRET_AUTH_LOGIN } from '../../configs/dotenv.config';
 
 export const authService = {
   async register(data: RegisterUserRequest) {
@@ -73,6 +72,11 @@ export const authService = {
 
     if (!findExistingUser) throw new Error('Invalid credential user account');
 
+    if (!findExistingUser.isVerified)
+      throw new Error(
+        'User account not verified. Please verified account first',
+      );
+
     const isMatched = await bcrypt.hashCompare(
       data.password,
       findExistingUser?.password,
@@ -85,7 +89,7 @@ export const authService = {
         role: findExistingUser?.role,
         userId: findExistingUser?.id,
       },
-      'POSAPP@jcwdol025',
+      JWT_SECRET_AUTH_LOGIN!,
       {
         expiresIn: '1h',
       },

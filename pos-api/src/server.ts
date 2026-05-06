@@ -3,12 +3,15 @@ import cors from 'cors';
 import { authRouter } from './features/auth/auth.router';
 import { corsOptions } from './configs/cors-options.config';
 import { ZodError } from 'zod';
+import cookieParser from 'cookie-parser';
 
 const PORT: number = 8000;
 const app = express();
 const API_PREFIX = '/api/v1';
 
 app.use(cors(corsOptions));
+
+app.use(cookieParser());
 
 app.use(express.json());
 
