@@ -6,7 +6,11 @@ import transporter from '../../lib/nodemailer.lib';
 import { LoginUserRequest, RegisterUserRequest } from './auth.model';
 import fs from 'fs';
 import Handlebars from 'handlebars';
-import { JWT_SECRET_ACCOUNT_ACTIVATION, JWT_SECRET_AUTH_LOGIN } from '../../configs/dotenv.config';
+import {
+  JWT_SECRET_ACCOUNT_ACTIVATION,
+  JWT_SECRET_AUTH_LOGIN,
+} from '../../configs/dotenv.config';
+import { AppError } from '../../utils/app-error.util';
 
 export const authService = {
   async register(data: RegisterUserRequest) {
@@ -16,7 +20,7 @@ export const authService = {
       },
     });
 
-    if (findExistingUser) throw new Error('Email already registered');
+    if (findExistingUser) throw AppError('Email already registered', 409);
 
     const hashedPassword = await bcrypt.hashPassword(data.password);
 

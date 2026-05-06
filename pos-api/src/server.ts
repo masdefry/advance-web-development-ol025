@@ -19,7 +19,6 @@ app.use(`${API_PREFIX}/auth`, authRouter);
 
 app.use((error: any, req: Request, res: Response, next: NextFunction) => {
   if (error instanceof ZodError) {
-    console.log(error?.issues);
     return res.status(400).json({
       success: false,
       message: error.issues
@@ -28,9 +27,12 @@ app.use((error: any, req: Request, res: Response, next: NextFunction) => {
     });
   }
 
-  res.status(500).json({
+  const statusCode = error.statusCode? error.statusCode : 500;
+  const message = error.isExpose? error.message : 'Something went wrong'
+
+  res.status(statusCode).json({
     success: false,
-    message: error?.message,
+    message,
     data: null,
   });
 });
