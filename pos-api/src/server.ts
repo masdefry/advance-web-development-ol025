@@ -4,6 +4,7 @@ import { authRouter } from './features/auth/auth.router';
 import { corsOptions } from './configs/cors-options.config';
 import { ZodError } from 'zod';
 import cookieParser from 'cookie-parser';
+import { productsRouter } from './features/products/products.router';
 
 const PORT: number = 8000;
 const app = express();
@@ -16,6 +17,7 @@ app.use(cookieParser());
 app.use(express.json());
 
 app.use(`${API_PREFIX}/auth`, authRouter);
+app.use(`${API_PREFIX}/products`, productsRouter);
 
 app.use((error: any, req: Request, res: Response, next: NextFunction) => {
   if (error instanceof ZodError) {
@@ -27,8 +29,8 @@ app.use((error: any, req: Request, res: Response, next: NextFunction) => {
     });
   }
 
-  const statusCode = error.statusCode? error.statusCode : 500;
-  const message = error.isExpose? error.message : 'Something went wrong'
+  const statusCode = error.statusCode ? error.statusCode : 500;
+  const message = error.isExpose ? error.message : 'Something went wrong';
 
   res.status(statusCode).json({
     success: false,
