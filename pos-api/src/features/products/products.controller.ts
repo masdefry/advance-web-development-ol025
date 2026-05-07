@@ -1,7 +1,7 @@
-import { Request, Response } from "express";
+import { Request, Response } from 'express';
 
 export const productsController = {
-    async create(req: Request, res: Response){
-        
-    }
-}
+  async create(req: Request, res: Response) {
+    const {} = req.body; 
+  },
+};

@@ -2,9 +2,10 @@ import { Request } from 'express';
 import multer, { diskStorage, FileFilterCallback } from 'multer';
 import path from 'path';
 import { FILE_UPLOAD_DIRECTORY } from '../configs/dotenv.config';
+import { AppError } from '../utils/app-error.util';
 
 export const multerUploads = {
-  async uploads() {
+  uploads(acceptedFileExtension: string[]) {
     const storage = diskStorage({
       destination: function (
         req: Request,
@@ -19,27 +20,29 @@ export const multerUploads = {
         file: Express.Multer.File,
         cb: (error: Error | null, destination: string) => void,
       ) {
+        const originalNameArr = file.originalname.split('.');
+        const originalExtension = originalNameArr[originalNameArr.length - 1];
+
         const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1e9);
-        cb(null, file.fieldname + '-' + uniqueSuffix);
+        cb(null, `${file.fieldname}-${uniqueSuffix}.${originalExtension}`);
       },
     });
 
     function fileFilter(
       req: Request,
-      file: Express.Multer.File,
+      file: Express.Multer.File,  
       cb: FileFilterCallback,
     ) {
-      // The function should call `cb` with a boolean
-      // to indicate if the file should be accepted
+      console.log(file);
 
-      // To reject this file pass `false`, like so:
-      cb(null, false);
+      const originalNameArr = file.originalname.split('.');
+      const originalExtension = originalNameArr[originalNameArr.length - 1];
 
-      // To accept the file pass `true`, like so:
+      if (!acceptedFileExtension.includes(originalExtension)) {
+        cb(AppError('Format file not accepted', 415));
+      }
+
       cb(null, true);
-
-      // You can always pass an error if something goes wrong:
-      cb(new Error("I don't have a clue!"));
     }
 
     return multer({ storage, fileFilter });

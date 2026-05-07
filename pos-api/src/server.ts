@@ -5,6 +5,7 @@ import { corsOptions } from './configs/cors-options.config';
 import { ZodError } from 'zod';
 import cookieParser from 'cookie-parser';
 import { productsRouter } from './features/products/products.router';
+import { categoriesRouter } from './features/categories/categories.router';
 
 const PORT: number = 8000;
 const app = express();
@@ -18,8 +19,11 @@ app.use(express.json());
 
 app.use(`${API_PREFIX}/auth`, authRouter);
 app.use(`${API_PREFIX}/products`, productsRouter);
+app.use(`${API_PREFIX}/categories`, categoriesRouter);
 
 app.use((error: any, req: Request, res: Response, next: NextFunction) => {
+  console.log(error);
+
   if (error instanceof ZodError) {
     return res.status(400).json({
       success: false,
