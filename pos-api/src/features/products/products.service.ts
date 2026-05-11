@@ -11,6 +11,7 @@ export const productsService = {
       data: {
         ...productsRequest,
         price: parseInt(productsRequest.price),
+        isAvailable: Boolean(productsRequest.isAvailable),
       },
     });
 
@@ -26,9 +27,9 @@ export const productsService = {
     });
 
     return {
-        name: productsRequest.name, 
-        price: productsRequest.price, 
-        categoryId: productsRequest.categoryId
-    }
+      name: productsRequest.name,
+      price: productsRequest.price,
+      categoryId: productsRequest.categoryId,
+    };
   },
 };

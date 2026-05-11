@@ -1,21 +1,40 @@
 'use client';
+import useGetCategories from '@/features/dashboard/categories-management/hooks/useGetCategories';
+import useCreateMenu from '@/features/dashboard/menus-management/hooks/useCreateMenu';
 import { useFormik } from 'formik';
+import { useEffect } from 'react';
 
 export default function CreateNewMenuPage() {
+  const { loading, execute } = useCreateMenu();
+  const {
+    loading: loadingGetCategories,
+    execute: executeGetCategories,
+    categories,
+  } = useGetCategories();
+
   const formik = useFormik({
     initialValues: {
       name: '',
       price: 0,
       isAvailable: false,
       files: [] as File[],
+      categoryId: '',
     },
-    onSubmit: ({ name, price, isAvailable, files }: any) => {
-      console.log(name);
-      console.log(price);
-      console.log(isAvailable);
-      console.log(files);
+    onSubmit: ({ name, price, isAvailable, files, categoryId }: any) => {
+      const fd = new FormData();
+      fd.append('name', name);
+      fd.append('price', price);
+      fd.append('isAvailable', isAvailable);
+      fd.append('categoryId', categoryId);
+      files?.forEach((file: File) => fd.append('productImages', file));
+      console.log(categoryId);
+      execute(fd);
     },
   });
+
+  useEffect(() => {
+    executeGetCategories();
+  }, []);
 
   return (
     <>
@@ -42,6 +61,25 @@ export default function CreateNewMenuPage() {
             className='input w-full'
             placeholder='Type here'
           />
+          <p className='label'>Optional</p>
+        </fieldset>
+
+        <fieldset className='fieldset'>
+          <legend className='fieldset-legend'>Category</legend>
+          <select
+            name='categoryId'
+            onChange={formik?.handleChange}
+            className='select'
+          >
+            <option value=''>Select Category</option>
+            {categories?.map((category: any) => {
+              return (
+                <option key={category?.id} value={category?.id}>
+                  {category?.name}
+                </option>
+              );
+            })}
+          </select>
           <p className='label'>Optional</p>
         </fieldset>
 

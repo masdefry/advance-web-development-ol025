@@ -4,3 +4,4 @@ import { Router } from 'express';
 export const categoriesRouter = Router();
 
 categoriesRouter.post('/', categoriesController.create);
+categoriesRouter.get('/', categoriesController.getAll)

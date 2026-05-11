@@ -9,4 +9,8 @@ export const categoriesService = {
 
     return { name };
   },
+
+  async getAll(){
+    return await prisma.category.findMany()
+  }
 };

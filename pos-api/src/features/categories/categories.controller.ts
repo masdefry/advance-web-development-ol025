@@ -13,4 +13,14 @@ export const categoriesController = {
       data: createdCategory,
     });
   },
+
+  async getAll(req: Request, res: Response){
+    const categories = await categoriesService.getAll()
+
+    res.status(200).json({
+      success: true, 
+      message: 'Categories retrieved successfully', 
+      data: categories
+    })
+  }
 };
