@@ -1,6 +1,7 @@
+import { Prisma } from '../../../generated/prisma/client';
 import { FILE_UPLOAD_DIRECTORY } from '../../configs/dotenv.config';
 import { prisma } from '../../database/database';
-import { ProductsCreateRequest } from './products.model';
+import { ProductsCreateRequest, ProductsListQuery } from './products.model';
 
 export const productsService = {
   async create(
@@ -31,5 +32,33 @@ export const productsService = {
       price: productsRequest.price,
       categoryId: productsRequest.categoryId,
     };
+  },
+
+  async getAll(query: ProductsListQuery) {
+    const offset = (query.page - 1) * query.limit;
+    const where: Prisma.ProductWhereInput = {};
+
+    if (query.search)
+      where.name = { contains: query.search, mode: 'insensitive' };
+    if (query.categoryId) where.categoryId = query.categoryId;
+
+    const [products, total] = await Promise.all([
+      prisma.product.findMany({
+        where,
+        skip: offset,
+      }),
+
+      prisma.product.count({ where }),
+    ]);
+
+    return {
+      products, 
+      meta: {
+        page: query.page, 
+        limit: query.limit, 
+        total, 
+        totalPage: Math.ceil(total/query.limit)
+      }
+    }
   },
 };

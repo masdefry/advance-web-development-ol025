@@ -14,3 +14,5 @@ productsRouter.post(
   ]),
   productsController.create,
 );
+
+productsRouter.get('/', productsController.getAll);

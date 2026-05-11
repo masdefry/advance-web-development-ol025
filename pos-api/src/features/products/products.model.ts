@@ -4,3 +4,10 @@ export type ProductsCreateRequest = {
     categoryId: string; 
     isAvailable: boolean;
 }
+
+export type ProductsListQuery = {
+    page: number; 
+    limit: number; 
+    search?: string; 
+    categoryId?: string;
+}
