@@ -5,8 +5,8 @@ import { FILE_UPLOAD_DIRECTORY } from '../configs/dotenv.config';
 import { AppError } from '../utils/app-error.util';
 
 export const multerUploads = {
-  uploads(acceptedFileExtension: string[]) {
-    const storage = diskStorage({
+  uploads(acceptedFileExtension: string[], uploadStorage: string) {
+    const storage = uploadStorage === 'disk'? diskStorage({
       destination: function (
         req: Request,
         file: Express.Multer.File,
@@ -26,7 +26,11 @@ export const multerUploads = {
         const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1e9);
         cb(null, `${file.fieldname}-${uniqueSuffix}.${originalExtension}`);
       },
-    });
+    }) 
+
+    :
+
+    multer.memoryStorage();
 
     function fileFilter(
       req: Request,

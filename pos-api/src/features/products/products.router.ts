@@ -9,7 +9,7 @@ productsRouter.post(
   '/',
   authMiddleware.verifyToken, 
   authMiddleware.requireAuth(['ADMIN']),
-  multerUploads.uploads(['jpg', 'jpeg', 'png', 'webp', 'svg']).fields([
+  multerUploads.uploads(['jpg', 'jpeg', 'png', 'webp', 'svg'], 'memory').fields([
     {
       name: 'productImages',
       maxCount: 3,

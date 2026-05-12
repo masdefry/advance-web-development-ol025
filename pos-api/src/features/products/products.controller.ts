@@ -7,7 +7,7 @@ export const productsController = {
   async create(req: Request, res: Response) {
     const productsRequest = req.body;
     let files: Express.Multer.File[] = [];
-
+    console.log(req?.files);
     if (Array.isArray(req.files)) {
       files = req.files;
     } else if (req.files) {

@@ -2,36 +2,53 @@ import { Prisma } from '../../../generated/prisma/client';
 import { FILE_UPLOAD_DIRECTORY } from '../../configs/dotenv.config';
 import { prisma } from '../../database/database';
 import { ProductsCreateRequest, ProductsListQuery } from './products.model';
+import { cloudinaryUpload } from '../../lib/cloudinary.lib';
 
 export const productsService = {
   async create(
     productsRequest: ProductsCreateRequest,
     files: Express.Multer.File[],
   ) {
-    const createdProduct = await prisma.product.create({
-      data: {
-        ...productsRequest,
-        price: parseInt(productsRequest.price),
-        isAvailable: Boolean(productsRequest.isAvailable),
+    return await prisma.$transaction(
+      async (tx) => {
+        const createdProduct = await tx.product.create({
+          data: {
+            ...productsRequest,
+            price: parseInt(productsRequest.price),
+            isAvailable: Boolean(productsRequest.isAvailable),
+          },
+        });
+
+        /* DISK STORAGE: */
+        // const productImagesRequest = files?.map((file: Express.Multer.File) => {
+        //   return {
+        //     url: `${FILE_UPLOAD_DIRECTORY}/${file.filename}`,
+        //     productId: createdProduct.id,
+        //   };
+        // });
+
+        /* MEMORY STORAGE FOR CLOUDINARY: */
+        const cloudinaryUploaded: any = files?.map(async (file) => {
+          const { secureUrl } = await cloudinaryUpload(file?.buffer);
+          return { url: secureUrl, productId: createdProduct.id };
+        });
+
+        const productIMagesRequest = await Promise.all(cloudinaryUploaded);
+
+        await tx.productImage.createMany({
+          data: productIMagesRequest,
+        });
+
+        return {
+          name: productsRequest.name,
+          price: productsRequest.price,
+          categoryId: productsRequest.categoryId,
+        };
       },
-    });
-
-    const productImagesRequest = files?.map((file: Express.Multer.File) => {
-      return {
-        url: `${FILE_UPLOAD_DIRECTORY}/${file.filename}`,
-        productId: createdProduct.id,
-      };
-    });
-
-    await prisma.productImage.createMany({
-      data: productImagesRequest,
-    });
-
-    return {
-      name: productsRequest.name,
-      price: productsRequest.price,
-      categoryId: productsRequest.categoryId,
-    };
+      {
+        timeout: 10000,
+      },
+    );
   },
 
   async getAll(query: ProductsListQuery) {
@@ -52,13 +69,13 @@ export const productsService = {
     ]);
 
     return {
-      products, 
+      products,
       meta: {
-        page: query.page, 
-        limit: query.limit, 
-        total, 
-        totalPage: Math.ceil(total/query.limit)
-      }
-    }
+        page: query.page,
+        limit: query.limit,
+        total,
+        totalPage: Math.ceil(total / query.limit),
+      },
+    };
   },
 };
