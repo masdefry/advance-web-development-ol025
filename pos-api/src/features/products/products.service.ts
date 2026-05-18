@@ -4,6 +4,7 @@ import { prisma } from '../../database/database';
 import { ProductsCreateRequest, ProductsListQuery } from './products.model';
 import { cloudinaryUpload } from '../../lib/cloudinary.lib';
 import redisConfig from '../../database/redis';
+import { CacheProducts } from './products.model';
 
 export const productsService = {
   async create(
@@ -50,7 +51,7 @@ export const productsService = {
         timeout: 10000,
       },
     );
-  },
+  }, 
 
   async getAll(query: ProductsListQuery) {
     const offset = (query.page - 1) * query.limit;
@@ -64,15 +65,14 @@ export const productsService = {
     let cacheProducts = await redisConfig.get(redisKey);
 
     if (cacheProducts) {
-      cacheProducts = await JSON.parse(cacheProducts);
+      const parsedProducts: CacheProducts = await JSON.parse(cacheProducts);
 
       return {
-        products: cacheProducts?.products,
-        meta: cacheProducts?.meta,
+        products: parsedProducts?.products,
+        meta: parsedProducts?.meta,
       };
     }
 
-    console.log('cacheProducts Not Found');
     const [products, total] = await Promise.all([
       prisma.product.findMany({
         where,
