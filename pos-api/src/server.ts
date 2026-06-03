@@ -6,6 +6,7 @@ import { ZodError } from 'zod';
 import cookieParser from 'cookie-parser';
 import { productsRouter } from './features/products/products.router';
 import { categoriesRouter } from './features/categories/categories.router';
+import { expiryTransactionsSchedule } from './jobs/expiry-transactions/expiry-transactions.schedule';
 
 const PORT: number = 8000;
 const app = express();
@@ -42,6 +43,8 @@ app.use((error: any, req: Request, res: Response, next: NextFunction) => {
     data: null,
   });
 });
+
+expiryTransactionsSchedule.execute();
 
 app.listen(PORT, () => {
   console.log(`[⚡SERVER] Running on port ${PORT}`);
