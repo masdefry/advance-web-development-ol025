@@ -7,6 +7,7 @@ import cookieParser from 'cookie-parser';
 import { productsRouter } from './features/products/products.router';
 import { categoriesRouter } from './features/categories/categories.router';
 import { expiryTransactionsSchedule } from './jobs/expiry-transactions/expiry-transactions.schedule';
+import { transactionsRouter } from './features/transactions/transactions.router';
 
 const PORT: number = 8000;
 const app = express();
@@ -21,6 +22,7 @@ app.use(express.json());
 app.use(`${API_PREFIX}/auth`, authRouter);
 app.use(`${API_PREFIX}/products`, productsRouter);
 app.use(`${API_PREFIX}/categories`, categoriesRouter);
+app.use(`${API_PREFIX}/transactions`, transactionsRouter);
 
 app.use((error: any, req: Request, res: Response, next: NextFunction) => {
   console.log(error);
