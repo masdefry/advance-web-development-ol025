@@ -49,5 +49,5 @@ app.use((error: any, req: Request, res: Response, next: NextFunction) => {
 expiryTransactionsSchedule.execute();
 
 app.listen(PORT, () => {
-  console.log(`[⚡SERVER] Running on port ${PORT}`);
+  console.log(`[⚡SERVER] Running on portsss ${PORT}`);
 });
